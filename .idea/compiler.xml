@@ -9,7 +9,7 @@
         <module name="MovieStarter" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="15">
       <module name="MovieStarter" target="19" />
     </bytecodeTargetLevel>
   </component>

@@ -1,0 +1,24 @@
+https://github.com/Nijanthan08/movies-spring-boot-rest-api link 1
+https://github.com/lucasncc/movie-rating-system/blob/main/src/main/java/com/codingchallenge/movieratingsystem/rating/Rating.java link 2
+
+https://stackoverflow.com/questions/44790923/docker-compose-spring-boot-postgres-connection#:~:text=For%20connect%20to%20container%20with%20database%20we%20need,rewrite%20spring.datasource.url%20value%20for%20connect%3A%20environment%3A%20SPRING_DATASOURCE_URL%3A%20jdbc%3Apostgresql%3A%2F%2Fdb%3A5432%2Ftestdb
+
+Cum instalezi dabasa: intri pe docker (il ai pornit), dupa care dintr un comand promt o sa dai docker login
+trb sa ai cont pe docker hub 
+te loghezi dupa dai comanda : docker run --name mypostgres -e POSTGRES_PASSWORD=mypassword -d -p 5432:5432 postgres
+asta o sa creeze o imagine cu numele : , parola pe portul 5432
+
+Pentru persistenta : docker volume create myvolume
+apoi : docker run --name mypostgres -e POSTGRES_PASSWORD=mypassword -d -p 5432:5432 -v myvolume:/var/lib/postgresql/data postgres
+
+pentru inf : docker inspect mypostgres, volumul de date ramane persistent
+
+in application prop : 
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/postgres
+spring.datasource.username=postgres
+spring.datasource.password=mypassword
+
+
+cu numele parola adaugate in comenzile anteriore
+
