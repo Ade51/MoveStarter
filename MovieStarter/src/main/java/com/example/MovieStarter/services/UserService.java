@@ -1,12 +1,12 @@
 package com.example.MovieStarter.services;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.example.MovieStarter.entities.User;
 import com.example.MovieStarter.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
-
 
 @Service
 public class UserService {
@@ -25,7 +25,7 @@ public class UserService {
             new_user.setIsadmin(false);
             new_user.setFirstName(user.getFirstName());
             new_user.setLastName(user.getLastName());
-            new_user.setPassword(user.getPassword());
+            new_user.setPassword(hashPassword(user.getPassword()));
             statusMessage = "Succesfly created account";
 
         } else {
@@ -36,7 +36,6 @@ public class UserService {
     }
 
     private String hashPassword(String password) {
-        // TODO : Do an encypted and decrypted function for passwords
-        return "Create function to encrypt passwords";
+        return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }
 }
