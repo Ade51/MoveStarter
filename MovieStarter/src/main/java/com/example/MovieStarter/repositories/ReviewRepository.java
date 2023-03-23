@@ -4,7 +4,10 @@ import com.example.MovieStarter.entities.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface RevuewRepository extends JpaRepository<Review, Integer> {
+import java.util.List;
 
+@Repository
+public interface ReviewRepository extends JpaRepository<Review, Integer> {
+
+    List<Review> findAllByMovieId(Integer movieId);
 }
