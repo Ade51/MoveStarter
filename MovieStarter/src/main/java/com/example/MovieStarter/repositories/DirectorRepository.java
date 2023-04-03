@@ -1,10 +1,10 @@
 package com.example.MovieStarter.repositories;
 
-import com.example.MovieStarter.entities.Language;
+import com.example.MovieStarter.entities.Director;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LanguageRepository extends JpaRepository<Language, Integer> {
-    Object findByName(String name);
+public interface DirectorRepository extends JpaRepository<Director, Integer> {
+    Director findDiretorByName(String name);
 }

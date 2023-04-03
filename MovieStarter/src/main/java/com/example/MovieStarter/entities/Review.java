@@ -17,28 +17,22 @@ import java.util.Date;
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
-    private Integer reviewId;
+    private Integer id;
 
-    @Column(name = "movieId")
-    private Integer movieId;
-
-    @Column(name = "createdUserId")
     private Integer createdUserId;
 
-    @Column(name = "createdUserName")
     private String createdUserName;
 
-    @Column(name = "likeMovie")
     private String likeMovie;
 
-    @Column(name = "comments")
     private String comments;
 
-    @Column(name = "rating")
     private Double rating;
 
-    @Column(name = "createTimestamp")
     private Date createTimestamp;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "movie_id", referencedColumnName = "id")
+    private Movie movie;
 
 }

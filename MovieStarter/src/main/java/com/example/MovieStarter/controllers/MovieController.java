@@ -1,23 +1,30 @@
 package com.example.MovieStarter.controllers;
 
-import com.example.MovieStarter.entities.Genre;
-import com.example.MovieStarter.entities.Language;
+import com.example.MovieStarter.DTO.MovieDTO;
+import com.example.MovieStarter.DTO.ReviewDTO;
+import com.example.MovieStarter.Errors.ErrorCodes;
+import com.example.MovieStarter.Errors.ErrorMessage;
+import com.example.MovieStarter.Responses.RequestResponse;
+import com.example.MovieStarter.Responses.RequestResponseT;
+import com.example.MovieStarter.Responses.ServiceResponse;
+import com.example.MovieStarter.Responses.ServiceResponseT;
 import com.example.MovieStarter.entities.Movie;
 import com.example.MovieStarter.entities.Review;
 import com.example.MovieStarter.services.MovieService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/movies")
 public class MovieController {
     private static final Logger LOG = LoggerFactory.getLogger(MovieController.class);
@@ -25,25 +32,33 @@ public class MovieController {
     @Autowired
     private MovieService moviesService;
 
-    @RequestMapping(value = "/languages", method = RequestMethod.GET)
-    public List<Language> getAllLanguages() {
-        return moviesService.getAllLanguages();
-    }
-
-    @RequestMapping(value = "/genres", method = RequestMethod.GET)
-    public List<Genre> getAllGenres() {
-        return moviesService.getAllGenres();
-    }
-
     @RequestMapping(value = "/popular", method = RequestMethod.GET)
-    public List<Movie> getPopularMovies() {
-        LOG.info("Fetch Popular Movies...");
+    public RequestResponse getPopularMovies(Model model) {
+
         List<Movie> list = moviesService.getAllMovies();
-        LOG.debug(": " + list.size());
-        List<Movie> ratedMovies = list.parallelStream().filter(obj -> null != obj.getRating())
-                .collect(Collectors.toList());
-        LOG.debug(": " + ratedMovies.size());
-        return ratedMovies;
+        if (list.isEmpty()) {
+            return RequestResponse.fromError(new ErrorMessage(HttpStatus.NOT_FOUND, "No movies found!", ErrorCodes.EntityNotFound));
+        } else {
+            list.sort((o1, o2)
+                    -> o1.getRating().getRating().compareTo(
+                    o2.getRating().getRating()));
+            Collections.reverse(list);
+
+            return RequestResponseT.okRequestResponse();
+        }
+    }
+
+    @PutMapping("/{movie_id}/addLanguage/{language_id}")
+    public RequestResponse addLanguageToMovie(@PathVariable Integer movie_id, @PathVariable Integer language_id) {
+
+        ServiceResponse response =  moviesService.addLanguageToMovie(movie_id, language_id);
+        return RequestResponseT.fromError(response.getError());
+    }
+    @PutMapping("/{movie_id}/addGenre/{genre_id}")
+    public RequestResponse addGenreToMovie(@PathVariable Integer movie_id, @PathVariable Integer genre_id) {
+
+        ServiceResponse response =  moviesService.addGenreToMovie(movie_id, genre_id);
+        return RequestResponseT.fromError(response.getError());
     }
 
     @RequestMapping(value = "/{movieId}", method = RequestMethod.GET)
@@ -51,24 +66,43 @@ public class MovieController {
         return moviesService.getMovieInfo(movieId);
     }
 
-    @RequestMapping(value = "/review", method = RequestMethod.POST)
-    public List<Movie> addMovieReview(@RequestBody Review reviews) {
-        LOG.info("Add Movie Reviews...");
-        moviesService.addReview(reviews);
+    @PostMapping("/review/{movie_id}")
+    public RequestResponse<ReviewDTO> addMovieReview(@RequestBody ReviewDTO reviewDTO,
+                                                     @PathVariable Integer movie_id, Model model) {
+        LOG.info("Add Movie Reviews");
+        model.addAttribute("new_review", moviesService.getMovieInfo(movie_id));
+        ServiceResponseT<ReviewDTO> response = moviesService.addReview(reviewDTO, movie_id);
 
-        return moviesService.getMovieInfo(reviews.getMovieId());
+        return RequestResponse.fromServiceResponseOfType(response);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
-    public List<Movie> getAllMovies() {
-        LOG.info("Fetch all the Movies...");
-        return moviesService.getAllMovies();
+    @GetMapping
+    public RequestResponse getAllMovies(Model model) {
+        var list = moviesService.getAllMovies();
+
+        if (list.isEmpty()) {
+            return RequestResponseT.fromError(new ErrorMessage(HttpStatus.NOT_FOUND, "No movies found!", ErrorCodes.PhysicalFileNotFound));
+        }
+        model.addAttribute("MovieList", moviesService.getAllMovies());
+        return RequestResponseT.okRequestResponse();
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    public List<Movie> addMovie(@RequestBody Movie movie) {
-        LOG.info("Add a Movie...");
-        moviesService.addMovie(movie);
-        return moviesService.getAllMovies();
+    @PostMapping("/add")
+    public RequestResponse<MovieDTO> addMovie(@RequestBody MovieDTO movie, Model model) {
+
+        LOG.info("Add a Movie");
+        ServiceResponseT<MovieDTO> response = moviesService.addMovie(movie);
+        model.addAttribute("MovieList", moviesService.getAllMovies());
+        return RequestResponse.fromServiceResponseOfType(response);
+    }
+
+    @DeleteMapping("/del/{movie_id}")
+    public RequestResponse DeleteMovie(@PathVariable Integer movie_id) {
+
+        ServiceResponse response = moviesService.DeleteMovie(movie_id);
+        if (response.isOk()) {
+            return RequestResponseT.okRequestResponse();
+        }
+        return new RequestResponseT("Failed to delete movie", response.getError());
     }
 }
