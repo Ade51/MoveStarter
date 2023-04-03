@@ -18,7 +18,7 @@ import java.util.Set;
 public class Director {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Integer id;
     private String name;
 
