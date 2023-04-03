@@ -17,7 +17,7 @@ import java.util.Date;
 public class Rating {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Integer id;
 
     private Integer likes;

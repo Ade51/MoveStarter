@@ -16,7 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class Review {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Integer id;
 
     private Integer createdUserId;

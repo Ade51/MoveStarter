@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Genre {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Integer id;
 
     private String name;
