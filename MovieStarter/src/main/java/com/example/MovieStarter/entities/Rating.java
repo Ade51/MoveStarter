@@ -1,9 +1,6 @@
 package com.example.MovieStarter.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,23 +17,22 @@ import java.util.Date;
 public class Rating {
 
     @Id
-    @Column(name = "movieId")
-    private Integer movieId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    @Column(name = "likes")
     private Integer likes;
 
-    @Column(name = "dislike")
     private Integer dislike;
 
-    @Column(name = "rating")
     private Double rating;
 
-    @Column(name = "totalRatings")
     private Integer totalRatings;
 
-    @Column(name = "createTimestamp")
     private Date createTimestamp;
 
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "movie_id")
+    private Movie movie;
 }
 

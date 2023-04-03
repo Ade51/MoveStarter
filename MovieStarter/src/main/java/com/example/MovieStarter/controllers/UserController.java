@@ -1,18 +1,18 @@
 package com.example.MovieStarter.controllers;
 
-import com.example.MovieStarter.entities.User;
+import com.example.MovieStarter.DTO.LoginUser;
+import com.example.MovieStarter.DTO.SignUpUser;
+import com.example.MovieStarter.Responses.ServiceResponse;
 import com.example.MovieStarter.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.io.IOException;
+
+@RestController
 @RequestMapping("/users")
 public class UserController {
     private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
@@ -21,24 +21,29 @@ public class UserController {
     private UserService userService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public String login(@RequestBody User loginUser, HttpServletResponse response) {
+    public void login(@RequestBody LoginUser loginUser, HttpServletResponse response) throws IOException {
         String jwt = null;
 
-        return "Success";
+        ServiceResponse status = userService.correctUser(loginUser);
+
+        if (status.isOk()) {
+            response.sendError(HttpServletResponse.SC_OK, "Succesfly logged in !r");
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, status.getError().getMessage());
+        }
     }
 
-    // @RequestMapping(method = RequestMethod.POST)
-    @PostMapping
-    public void signUp(@RequestBody User user, HttpServletResponse response) {
-        LOG.info("Sign Up....");
+
+     @RequestMapping(value = "/signup", method = RequestMethod.POST)
+    public void signUp(@RequestBody SignUpUser user, HttpServletResponse response) {
+        LOG.info("Sign Up");
 
         try {
-            String status = userService.signUp(user);
-
-            if (!"Succesfly created account".equalsIgnoreCase(status))
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, status);
+            ServiceResponse status = userService.signUp(user);
+            if (status.isOk())
+                response.sendError(HttpServletResponse.SC_OK, "Created User");
             else
-                response.sendError(HttpServletResponse.SC_OK, status);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, status.getError().getMessage());
         } catch (Exception e) {
             LOG.error("Exception : " + e);
         }
