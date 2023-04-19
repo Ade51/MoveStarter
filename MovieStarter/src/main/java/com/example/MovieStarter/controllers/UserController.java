@@ -27,7 +27,7 @@ public class UserController {
         ServiceResponse status = userService.correctUser(loginUser);
 
         if (status.isOk()) {
-            response.sendError(HttpServletResponse.SC_OK, "Succesfly logged in !r");
+            response.sendError(HttpServletResponse.SC_OK, "Successfully logged in !");
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, status.getError().getMessage());
         }

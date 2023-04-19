@@ -16,10 +16,10 @@ public class DirectorController {
     @Autowired
     private DirectorService directorService;
 
-    @PutMapping("/{directorid}/movies/{movieid}")
-    public RequestResponse addCreatedMovies(@PathVariable Integer directorid, @PathVariable Integer movieid) {
+    @PutMapping("/{director_id}/movies/{movie_id}")
+    public RequestResponse addCreatedMovies(@PathVariable Integer director_id, @PathVariable Integer movie_id) {
 
-        ServiceResponse response =  directorService.addMovies(directorid, movieid);
+        ServiceResponse response =  directorService.addMovies(director_id, movie_id);
         return RequestResponseT.fromError(response.getError());
     }
 

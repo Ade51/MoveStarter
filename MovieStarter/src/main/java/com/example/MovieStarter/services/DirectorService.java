@@ -32,10 +32,12 @@ public class DirectorService {
     public ServiceResponse addMovies(Integer directorid, Integer movieid) {
         Optional<Director> director = getDirectorById(directorid);
         Optional<Movie> movie = movieRepository.findById(movieid);
+
         if (movie.isPresent() && director.isPresent()) {
             Movie mov = movie.get();
             Director dir = director.get();
             dir.saveMovies(mov);
+            mov.saveDirector(dir);
             return ServiceResponse.forSuccess();
         }
         return ServiceResponse.fromError(new ErrorMessage(HttpStatus.NOT_FOUND, "Either director or movie does not exist !", ErrorCodes.CannotAdd));

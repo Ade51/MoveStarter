@@ -33,18 +33,24 @@ public class MovieController {
     private MovieService moviesService;
 
     @RequestMapping(value = "/popular", method = RequestMethod.GET)
-    public RequestResponse getPopularMovies(Model model) {
+    public RequestResponse getPopularMovies(Model model) throws NullPointerException {
 
         List<Movie> list = moviesService.getAllMovies();
         if (list.isEmpty()) {
             return RequestResponse.fromError(new ErrorMessage(HttpStatus.NOT_FOUND, "No movies found!", ErrorCodes.EntityNotFound));
         } else {
-            list.sort((o1, o2)
-                    -> o1.getRating().getRating().compareTo(
-                    o2.getRating().getRating()));
-            Collections.reverse(list);
+            try {
+                list.sort((o1, o2)
+                        -> o1.getRating().getRating().compareTo(
+                        o2.getRating().getRating()));
+                Collections.reverse(list);
 
-            return RequestResponseT.okRequestResponse();
+                model.addAttribute("Popular_list", list);
+                return RequestResponseT.okRequestResponse();
+            } catch (NullPointerException e) {
+                model.addAttribute("Popular_list", list);
+                return RequestResponseT.okRequestResponse();
+            }
         }
     }
 
@@ -62,8 +68,9 @@ public class MovieController {
     }
 
     @RequestMapping(value = "/{movieId}", method = RequestMethod.GET)
-    public List<Movie> getMovieInfo(@PathVariable("movieId") Integer movieId) {
-        return moviesService.getMovieInfo(movieId);
+    public RequestResponse<Movie> getMovieInfo(@PathVariable("movieId") Integer movieId) {
+        ServiceResponseT<Movie> response =  moviesService.getMovieInfo(movieId);
+        return RequestResponse.fromServiceResponseOfType(response);
     }
 
     @PostMapping("/review/{movie_id}")
@@ -87,19 +94,19 @@ public class MovieController {
         return RequestResponseT.okRequestResponse();
     }
 
-    @PostMapping("/add")
-    public RequestResponse<MovieDTO> addMovie(@RequestBody MovieDTO movie, Model model) {
+    @PostMapping("/add/{user_id}")
+    public RequestResponse<MovieDTO> addMovie(@PathVariable Integer user_id, @RequestBody MovieDTO movie, Model model) {
 
-        LOG.info("Add a Movie");
-        ServiceResponseT<MovieDTO> response = moviesService.addMovie(movie);
+
+        ServiceResponseT<MovieDTO> response = moviesService.addMovie(movie, user_id);
         model.addAttribute("MovieList", moviesService.getAllMovies());
         return RequestResponse.fromServiceResponseOfType(response);
     }
 
-    @DeleteMapping("/del/{movie_id}")
-    public RequestResponse DeleteMovie(@PathVariable Integer movie_id) {
+    @DeleteMapping("/del/{movie_id}/{user_id}")
+    public RequestResponse DeleteMovie(@PathVariable Integer movie_id, @PathVariable Integer user_id) {
 
-        ServiceResponse response = moviesService.DeleteMovie(movie_id);
+        ServiceResponse response = moviesService.DeleteMovie(movie_id, user_id);
         if (response.isOk()) {
             return RequestResponseT.okRequestResponse();
         }

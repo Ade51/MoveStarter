@@ -50,4 +50,7 @@ public class Movie {
     @OneToMany(mappedBy = "movie")
     private Set<Review> reviews = new HashSet<>();
 
+    public void saveDirector(Director dir) {
+        this.directors.add(dir);
+    }
 }

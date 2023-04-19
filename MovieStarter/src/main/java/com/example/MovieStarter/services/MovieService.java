@@ -34,6 +34,9 @@ public class MovieService {
     @Autowired
     private GenreRepository genreRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
 
     public List<Language> getAllLanguages() {
         return languageRepository.findAll();
@@ -48,7 +51,16 @@ public class MovieService {
         return list;
     }
 
-    public ServiceResponseT<MovieDTO> addMovie(MovieDTO movie) {
+    public ServiceResponseT<MovieDTO> addMovie(MovieDTO movie, Integer user_id) {
+
+        if (userRepository.findById(user_id).isEmpty()) {
+            return ServiceResponseT.createError(new ErrorMessage(HttpStatus.UNAUTHORIZED, "User does not exist !", ErrorCodes.CannotDelete));
+        }
+
+
+        if (!(userRepository.findById(user_id).get().isIs_admin())) {
+            return ServiceResponseT.createError(new ErrorMessage(HttpStatus.UNAUTHORIZED, "Only admins can add movies", ErrorCodes.CannotAdd));
+        }
 
         Optional<Movie> mov = Optional.ofNullable(movieRepository.findMovieByName(movie.getName()));
         if (mov.isPresent()) {
@@ -66,9 +78,12 @@ public class MovieService {
         return ServiceResponseT.forSuccess(movie);
     }
 
-    public List<Movie> getMovieInfo(Integer movieId) {
+    public ServiceResponseT<Movie> getMovieInfo(Integer movieId) {
 
         Optional<Movie> movieOptional = movieRepository.findById(movieId);
+        if (movieOptional.isEmpty()) {
+            return ServiceResponseT.createError(new ErrorMessage(HttpStatus.NOT_FOUND, "The movie does not exist!", ErrorCodes.EntityNotFound));
+        }
         Movie movie = movieOptional.get();
         // Update Reviews
         Set<Review> reviews = reviewRepository.findAllByMovieId(movie.getId());
@@ -78,7 +93,7 @@ public class MovieService {
         List<Movie> list = List.of(movie);
         updateLanguageGenres(list);
 
-        return list;
+        return ServiceResponseT.forSuccess(movie);
     }
 
     private void updateLanguageGenres(List<Movie> list) {
@@ -144,7 +159,16 @@ public class MovieService {
         return movieRepository.findById(movieId);
     }
 
-    public ServiceResponse DeleteMovie(Integer movie_id) {
+    public ServiceResponse DeleteMovie(Integer movie_id, Integer user_id) {
+
+        if (userRepository.findById(user_id).isEmpty()) {
+            return ServiceResponse.fromError(new ErrorMessage(HttpStatus.UNAUTHORIZED, "User does not exist !", ErrorCodes.CannotDelete));
+        }
+
+
+        if (!(userRepository.findById(user_id).get().isIs_admin())) {
+            return ServiceResponse.fromError(new ErrorMessage(HttpStatus.UNAUTHORIZED, "Only admins can delete movies", ErrorCodes.CannotDelete));
+        }
 
         Optional<Movie> movie = getMovieById(movie_id);
 
